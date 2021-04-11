@@ -27,13 +27,17 @@ export default function PatientSidePage() {
   const [morseText, setMorseText] = useState("");
   const [dispMorseText, setDispMorseText] = useState("");
 
+  let txt = useRef();
+
   const dit = () => {
     console.log("Dit");
+    if (txt.current) { setMorseText(""); txt.current = false; }
     setMorseText(morseText + '0');
   };
 
   const dash = () => {
     console.log("Dash");
+    if (txt.current) { setMorseText(""); txt.current = false; }
     setMorseText(morseText + '1');
   };
 
@@ -53,7 +57,6 @@ export default function PatientSidePage() {
       }).then(snap => {
         chatsRef.child(chatserverID).child(snap.key).child("key").set(snap.key);
       });
-      window.responsiveVoice.speak(`Message sent to ${thatUser.displayName} ${sanitizedMessage}`);
       console.log("Send Message...", sanitizedMessage, thisUser);
     }
   };
@@ -68,7 +71,6 @@ export default function PatientSidePage() {
   };
 
   const mouseuplistener = snap => {
-    const swipe = checkSwipe(clientX, newClientX);
     if (window.innerWidth > 600) {
       timeSinceLastTouch.current = 0;
       if (touches === 1) {
@@ -143,7 +145,13 @@ export default function PatientSidePage() {
           for (let i in text) {
             tempMorse += (NORMAL_TO_MORSE_CHARS[0][text[i]]) + " ";
           }
-          window.responsiveVoice.speak(`New message from Jaagrav ${text}`);
+          if (snap.val()?.user?.uid !== thisUser?.uid)
+            window.responsiveVoice.speak(`New message from Jaagrav ${text}`);
+          else
+            window.responsiveVoice.speak(`Message sent to ${thatUser.displayName} ${text}`);
+
+          txt.current = true;
+
           setMorseText(tempMorse);
         });
       }
@@ -168,10 +176,14 @@ export default function PatientSidePage() {
     }
 
     setText(tempText);
-    window.responsiveVoice.speak(tempText);
 
     setDispMorseText(morseText.replace(/0/g, ".").replace(/1/g, "-"));
   }, [morseText]);
+
+  useEffect(() => {
+    if (window.responsiveVoice.isPlaying())
+      window.responsiveVoice.speak(text);
+  }, [text]);
 
   return <Container className={classes.patientSidePage}>
     <div
