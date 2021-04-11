@@ -47,12 +47,12 @@ export default function PatientSidePage() {
 
     const sanitizedMessage = text.trim();
     if (sanitizedMessage.trim() !== "") {
-      // chatsRef.child(chatserverID).push({
-      //   message: sanitizedMessage,
-      //   user: thisUser
-      // }).then(snap => {
-      //   chatsRef.child(chatserverID).child(snap.key).child("key").set(snap.key);
-      // });
+      chatsRef.child(chatserverID).push({
+        message: sanitizedMessage,
+        user: thisUser
+      }).then(snap => {
+        chatsRef.child(chatserverID).child(snap.key).child("key").set(snap.key);
+      });
       window.responsiveVoice.speak(`Message sent to ${thatUser.displayName} ${sanitizedMessage}`);
       console.log("Send Message...", sanitizedMessage, thisUser);
     }
@@ -122,12 +122,12 @@ export default function PatientSidePage() {
   };
 
   const contextmenulistener = event => event.preventDefault();
-  document.body.addEventListener("keydown", e => {
-    if (e.code === "KeyF") nextAlphabet();
-    else if (e.code === "KeyJ") sendMsg();
-  });
-  useEffect(() => {
 
+  useEffect(() => {
+    window.addEventListener("keydown", e => {
+      if (e.code === "KeyF") nextAlphabet();
+      else if (e.code === "KeyJ") sendMsg();
+    });
 
     const subscription = firebase.auth().onAuthStateChanged(currentUser => {
       if (currentUser) {
